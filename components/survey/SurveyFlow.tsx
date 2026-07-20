@@ -120,6 +120,24 @@ function reducer(state: State, action: Action): State {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+interface SurveyPayload {
+  submissionId: string;
+  unit: Unit | null;
+  answers: Record<string, number | null | undefined>;
+  comments: Record<string, string>;
+  name: string;
+  email: string;
+  anonymous: boolean;
+}
+
+async function postSurvey(payload: SurveyPayload) {
+  return fetch("/api/survey", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
 export function SurveyFlow() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
   const unitRef = useRef<HTMLDivElement | null>(null);
@@ -165,6 +183,23 @@ export function SurveyFlow() {
     }
 
     dispatch({ type: "GO_TO_CONTACT" });
+
+    // Guarda las calificaciones como "Usuario Anónimo" apenas termina de
+    // calificar, antes de mostrar los datos de contacto opcionales — así, si
+    // cierra el navegador sin llegar a enviar, sus notas ya quedaron
+    // archivadas. El envío final (con o sin nombre/correo) actualiza esta
+    // misma fila en vez de crear una duplicada (ver app/api/survey/route.ts).
+    postSurvey({
+      submissionId: state.submissionId,
+      unit: state.unit,
+      answers: state.answers,
+      comments: state.comments,
+      name: "",
+      email: "",
+      anonymous: true,
+    }).catch(() => {
+      // Si falla (p. ej. sin conexión), el envío final igual crea la fila.
+    });
   }
 
   async function doSubmit(anonymous: boolean) {
@@ -179,18 +214,14 @@ export function SurveyFlow() {
     dispatch({ type: "SUBMIT_START" });
 
     try {
-      const res = await fetch("/api/survey", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          submissionId: state.submissionId,
-          unit: state.unit,
-          answers: state.answers,
-          comments: state.comments,
-          name: anonymous ? "" : state.name,
-          email: anonymous ? "" : state.email,
-          anonymous,
-        }),
+      const res = await postSurvey({
+        submissionId: state.submissionId,
+        unit: state.unit,
+        answers: state.answers,
+        comments: state.comments,
+        name: anonymous ? "" : state.name,
+        email: anonymous ? "" : state.email,
+        anonymous,
       });
 
       if (!res.ok) {

@@ -3,6 +3,7 @@ import { submissionSchema } from "@/lib/validation/survey";
 import { calculateOverallAverage } from "@/lib/nps";
 import { ANONYMOUS_NAME } from "@/lib/constants";
 import { getAnonSupabaseClient } from "@/lib/supabase/anon";
+import { getAdminSupabaseClient } from "@/lib/supabase/server";
 import type { SurveyResponseInsert } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     Object.entries(comments ?? {}).filter(([, text]) => text.trim().length > 0)
   );
 
-  const insertPayload: SurveyResponseInsert = {
+  const payload: SurveyResponseInsert = {
     submission_id: submissionId,
     unit,
     respondent_name: respondent.name,
@@ -67,21 +68,43 @@ export async function POST(request: NextRequest) {
     user_agent: request.headers.get("user-agent"),
   };
 
-  const supabase = getAnonSupabaseClient();
-  const { error } = await supabase.from("survey_responses").insert(insertPayload);
+  // Primer guardado (al terminar de calificar, antes de los datos de contacto):
+  // inserta con la clave anon — RLS solo permite insert a este rol, así que un
+  // bug en esta ruta nunca podría leer/editar/borrar otras filas.
+  const anonClient = getAnonSupabaseClient();
+  const { error: insertError } = await anonClient.from("survey_responses").insert(payload);
 
-  if (error) {
-    // Reintento con el mismo submissionId (p. ej. tras un fallo de red) no debe
-    // crear una fila duplicada: se trata como éxito idempotente.
-    if (error.code === "23505") {
-      return NextResponse.json({ ok: true }, { status: 201 });
-    }
-    console.error("Error al guardar la encuesta:", error);
-    return NextResponse.json(
-      { ok: false, message: "No se pudo guardar tu respuesta. Intenta de nuevo." },
-      { status: 500 }
-    );
+  if (!insertError) {
+    return NextResponse.json({ ok: true }, { status: 201 });
   }
 
-  return NextResponse.json({ ok: true }, { status: 201 });
+  // Reintento con el mismo submissionId: ya existe una fila (guardada cuando
+  // terminó de calificar). Se actualiza esa misma fila —p. ej. para agregar
+  // nombre/correo— en vez de crear una duplicada. Esto requiere la service
+  // role key porque el público solo tiene permiso de insert, nunca de update;
+  // el alcance queda acotado a esta única fila, identificada por el
+  // submissionId ya validado con Zod (nunca por un parámetro arbitrario).
+  if (insertError.code === "23505") {
+    const adminClient = getAdminSupabaseClient();
+    const { error: updateError } = await adminClient
+      .from("survey_responses")
+      .update(payload)
+      .eq("submission_id", submissionId);
+
+    if (updateError) {
+      console.error("Error al actualizar la encuesta:", updateError);
+      return NextResponse.json(
+        { ok: false, message: "No se pudo guardar tu respuesta. Intenta de nuevo." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ ok: true }, { status: 200 });
+  }
+
+  console.error("Error al guardar la encuesta:", insertError);
+  return NextResponse.json(
+    { ok: false, message: "No se pudo guardar tu respuesta. Intenta de nuevo." },
+    { status: 500 }
+  );
 }
