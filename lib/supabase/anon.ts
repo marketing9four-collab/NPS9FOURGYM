@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { requiredEnv } from "@/lib/env";
 
 /**
  * Cliente con la clave anon/publishable. Usado únicamente por el endpoint público
@@ -7,12 +8,8 @@ import { createClient } from "@supabase/supabase-js";
  * tenga un bug, la base de datos rechaza cualquier lectura/escritura fuera de insert.
  */
 export function getAnonSupabaseClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
-    throw new Error("Faltan las variables de entorno de Supabase (anon).");
-  }
+  const url = requiredEnv("NEXT_PUBLIC_SUPABASE_URL");
+  const key = requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
   return createClient(url, key, {
     auth: { persistSession: false },

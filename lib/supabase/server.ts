@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { requiredEnv } from "@/lib/env";
 
 /**
  * Cliente con la service role key: ignora RLS por completo.
@@ -8,12 +9,8 @@ import { createClient } from "@supabase/supabase-js";
  * build falle si este módulo termina en un bundle de cliente.
  */
 export function getAdminSupabaseClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!url || !serviceKey) {
-    throw new Error("Faltan las variables de entorno de Supabase (service role).");
-  }
+  const url = requiredEnv("NEXT_PUBLIC_SUPABASE_URL");
+  const serviceKey = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
 
   return createClient(url, serviceKey, {
     auth: { persistSession: false },
