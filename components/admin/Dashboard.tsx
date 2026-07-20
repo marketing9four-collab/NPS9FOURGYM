@@ -216,32 +216,35 @@ export function Dashboard() {
       </section>
 
       <section className="mt-8 rounded-2xl border border-brand-gray-200 bg-white p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-brand-black">Distribuição de notas</h2>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Selecione uma pergunta">
-            {questions.map((qDef) => (
-              <button
-                key={qDef.id}
-                type="button"
-                aria-pressed={selectedQuestionId === qDef.id}
-                onClick={() => setSelectedQuestionId(qDef.id)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-sm font-medium",
-                  selectedQuestionId === qDef.id
-                    ? "border-brand-black bg-brand-black text-white"
-                    : "border-brand-gray-200 text-brand-gray-600"
-                )}
-              >
-                {qDef.label}
-              </button>
-            ))}
-          </div>
+        <h2 className="text-base font-semibold text-brand-black">Distribuição de notas</h2>
+        <div
+          className="mt-3 flex gap-2 overflow-x-auto pb-1"
+          role="group"
+          aria-label="Selecione uma pergunta"
+        >
+          {questions.map((qDef) => (
+            <button
+              key={qDef.id}
+              type="button"
+              aria-pressed={selectedQuestionId === qDef.id}
+              onClick={() => setSelectedQuestionId(qDef.id)}
+              className={cn(
+                "flex-shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium",
+                selectedQuestionId === qDef.id
+                  ? "border-brand-black bg-brand-black text-white"
+                  : "border-brand-gray-200 text-brand-gray-600"
+              )}
+            >
+              {qDef.label}
+            </button>
+          ))}
         </div>
         {selectedQuestion && <DistributionChart question={selectedQuestion} />}
       </section>
 
       <section className="mt-8">
         <h2 className="text-base font-semibold text-brand-black">Métricas por pergunta</h2>
+        <p className="mt-1 text-xs text-brand-gray-600 sm:hidden">Deslize para o lado para ver mais →</p>
         <div className="mt-3">{stats && <QuestionMetricsTable data={stats.questionStats} />}</div>
       </section>
 
@@ -253,6 +256,7 @@ export function Dashboard() {
             <ResetDataButton onDone={handleRefresh} />
           </div>
         </div>
+        <p className="mt-1 text-xs text-brand-gray-600 sm:hidden">Deslize para o lado para ver mais →</p>
 
         <div className="mt-3">
           <ResponsesTable
