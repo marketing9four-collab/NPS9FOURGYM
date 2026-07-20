@@ -19,3 +19,6 @@ tsconfig.tsbuildinfo
 
 ## Design source files (large binaries, not app code)
 *.psd
+
+.vercel
+.env*

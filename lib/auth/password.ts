@@ -9,10 +9,13 @@ export async function verifyAdminCredentials(
   username: string,
   password: string
 ): Promise<boolean> {
-  const expectedUser = process.env.NPS_ADMIN_USER;
-  const expectedHash = process.env.NPS_ADMIN_PASSWORD_HASH || DUMMY_HASH;
+  // .trim() defiende contra espacios/CRLF finales que algunos flujos de
+  // configuracion de variables de entorno (dashboards, CLIs en Windows)
+  // pueden dejar accidentalmente al pegar/canalizar el valor.
+  const expectedUser = process.env.NPS_ADMIN_USER?.trim();
+  const expectedHash = process.env.NPS_ADMIN_PASSWORD_HASH?.trim() || DUMMY_HASH;
 
-  const userMatches = Boolean(expectedUser) && username === expectedUser;
+  const userMatches = Boolean(expectedUser) && username.trim() === expectedUser;
   const passwordMatches = await bcrypt.compare(
     password,
     userMatches ? expectedHash : DUMMY_HASH
