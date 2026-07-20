@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
+import { SESSION_COOKIE, verifySessionToken } from "./lib/auth/session";
 
 export const config = {
   matcher: ["/admin/nps-9fourgym/:path*", "/api/admin/:path*"],
