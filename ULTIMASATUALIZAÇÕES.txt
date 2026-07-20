@@ -1,0 +1,125 @@
+=================================================================
+ NPS 9FOURGYM — STATUS DO PROJETO
+ Ultima atualizacao: 20/07/2026
+=================================================================
+
+LINKS
+-----
+Encuesta publica (para divulgar):
+  https://nps-9-fourgym.vercel.app
+
+Painel admin (login):
+  https://nps-9-fourgym.vercel.app/admin/nps-9fourgym/login
+  Usuario: Cami
+  Senha:   cami9fourgym
+
+GitHub:
+  https://github.com/marketing9four-collab/NPS9FOURGYM
+
+Vercel:
+  Projeto: 9fourgym-3195s-projects/nps-9-fourgym
+
+Supabase:
+  https://vewjjcgevcxicooxbllb.supabase.co
+
+
+STATUS GERAL: NO AR E FUNCIONANDO
+----------------------------------
+- Supabase: migrations 0001, 0002, 0003 rodadas. RLS ativa (publico so insere,
+  nunca le/edita/apaga).
+- GitHub: repositorio criado e conectado, push funcionando.
+- Vercel: deploy de producao funcionando, todas as env vars configuradas.
+- Encuesta publica: testada e funcionando (envio, N/A, anonimo, comentarios).
+- Painel admin: testado e funcionando (login, metricas, tabela, filtros,
+  exportar CSV, apagar todos os dados).
+
+
+O QUE JA FOI FEITO (ordem cronologica resumida)
+-------------------------------------------------
+1. App completo criado do zero: Next.js + TypeScript + Tailwind + Supabase.
+2. Encuesta publica em espanhol mexicano (ES-MX):
+   - Tela de boas-vindas (fundo preto, texto branco, logo, ~2.5s, depois some).
+   - Banner "banner_1.png" no topo.
+   - Selecao de unidade (Arboledas, Metepec, Interlomas, Lomas).
+   - 8 perguntas de avaliacao (0-10 + N/A): recepcion, equipos, limpieza,
+     banos, clases_colectivas, entrenadores, gerencia, estacionamiento.
+   - Botao "Quiero comentar esto" em cada pergunta (comentario opcional).
+   - Etapa de contato opcional (nome/email) com envio anonimo.
+   - Tela de confirmacao final.
+3. Painel admin (/admin/nps-9fourgym) 100% em PORTUGUES (PT-BR), conforme
+   pedido, mesmo com a encuesta publica em espanhol:
+   - Login protegido (cookie assinada, senha com hash bcrypt).
+   - Metricas gerais, graficos (media por pergunta, comparacao por unidade,
+     distribuicao de notas), tabela de respostas, filtros (unidade/data/busca),
+     paginacao, exportar CSV, botao "Apagar todos os dados" (com confirmacao).
+4. Banco de dados (Supabase):
+   - Tabela survey_responses com RLS (publico so insere).
+   - Campo answers (jsonb), comments (jsonb), overall_average calculado
+     ignorando N/A.
+5. Deploy: GitHub -> Vercel, com todas as env vars configuradas.
+
+
+BUGS ENCONTRADOS E CORRIGIDOS
+-------------------------------
+1. Hash da senha do admin com "$" sendo expandido pelo Next.js em .env.local
+   -> corrigido escapando com "\$" (so no .env.local local; no Vercel nao
+   precisa escapar).
+2. Middleware do Vercel nao resolvia import "@/lib/auth/session" (Edge
+   Function bundling) -> corrigido usando import relativo "./lib/auth/session".
+3. BOM (caractere invisivel U+FEFF) entrando nas variaveis de ambiente do
+   Supabase ao configurar via PowerShell -> corrigido com .trim() em todos os
+   lugares que leem env vars (lib/env.ts, lib/auth/session.ts,
+   lib/supabase/anon.ts, lib/supabase/server.ts).
+4. Login admin falhando com usuario/senha corretos -> mesmo motivo do BOM,
+   corrigido com o .trim().
+
+
+ULTIMA FEATURE IMPLEMENTADA
+------------------------------
+Auto-save das respostas: assim que o usuario termina de avaliar (clica em
+"Continuar" depois da ultima pergunta, Estacionamiento), a resposta ja e
+salva no banco como "Usuario Anonimo". Se ele fechar o navegador na tela de
+contato sem preencher nada, a resposta ja esta arquivada. Se ele preencher
+nome/email e enviar, o MESMO registro e atualizado (nao cria duplicata).
+Testado em producao e confirmado funcionando (arquivo
+app/api/survey/route.ts).
+
+
+PENDENCIAS / PROXIMOS PASSOS
+-------------------------------
+[ ] Decidir se limpa os dados de teste que ja estao no banco (existem
+    algumas respostas de teste la, incluindo "Kevin / kevin@9fourgym.mx").
+    Usar o botao "Apagar todos os dados" no painel antes de divulgar o link
+    de verdade.
+[ ] Confirmar se quer o link opcional "Volver al sitio" na tela de
+    confirmacao (variavel NEXT_PUBLIC_SITE_URL, hoje vazia/nao configurada).
+[ ] Considerar: salvar automaticamente como incompleto ja durante o
+    preenchimento das perguntas (antes de terminar todas)? Hoje o auto-save
+    so acontece DEPOIS de responder todas as perguntas e clicar Continuar.
+[ ] Revisar textos finais das 8 perguntas com o time da 9FOURGYM (foram
+    definidas com base no pedido do usuario: limpeza, banheiros, aulas
+    coletivas, professores/treinadores, gerencia da unidade, estacionamento).
+
+
+ARQUIVOS IMPORTANTES
+-----------------------
+lib/questions.ts              -> lista das perguntas da encuesta (editar aqui
+                                  para adicionar/remover perguntas)
+app/api/survey/route.ts       -> logica de salvar/atualizar resposta
+lib/auth/password.ts          -> validacao de login do admin
+supabase/migrations/          -> SQL das tabelas e seguranca (RLS)
+supabase/README.md            -> instrucoes de configuracao do Supabase
+README.md                     -> instrucoes completas de rodar local e deploy
+.env.local                    -> variaveis de ambiente locais (nao vai pro
+                                  GitHub, arquivo so nesta maquina)
+
+
+COMO RETOMAR O TRABALHO
+--------------------------
+1. Abrir este projeto de novo com o Claude Code.
+2. Rodar "npm run dev" para testar local (precisa do .env.local configurado,
+   ja esta).
+3. Qualquer alteracao: editar o codigo, rodar "npx tsc --noEmit" para
+   verificar erros, depois "git add -A", "git commit -m ...",
+   "git push origin main", e "vercel --prod --yes" para publicar.
+=================================================================
