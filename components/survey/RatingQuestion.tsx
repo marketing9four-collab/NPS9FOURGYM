@@ -42,7 +42,7 @@ export function RatingQuestion({
       <div
         role="group"
         aria-labelledby={groupLabelId}
-        className="rating-scroll mt-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-6 pb-2"
+        className="mt-4 flex flex-wrap gap-2"
       >
         <RatingButton
           selected={value === null}
@@ -116,7 +116,7 @@ function RatingButton({
       aria-label={ariaLabel}
       onClick={onClick}
       className={cn(
-        "flex h-12 w-12 flex-shrink-0 snap-start items-center justify-center rounded-full border-2 text-sm font-bold transition-colors",
+        "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors",
         selected ? colors.selected : colors.base
       )}
     >
