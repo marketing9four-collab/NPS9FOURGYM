@@ -12,7 +12,7 @@ export function WelcomeScreen({ onDone }: { onDone: () => void }) {
   }, [onDone]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-brand-black px-6 text-center">
       <div className="animate-welcome-in">
         <Image
           src="/images/shield-logo.png"
@@ -23,7 +23,7 @@ export function WelcomeScreen({ onDone }: { onDone: () => void }) {
         />
       </div>
       <h1
-        className="mt-6 animate-welcome-in text-2xl font-bold text-brand-black sm:text-3xl"
+        className="mt-6 animate-welcome-in text-2xl font-bold text-white sm:text-3xl"
         style={{ animationDelay: "150ms" }}
       >
         ¡Bienvenido a la encuesta de satisfacción!
@@ -31,7 +31,7 @@ export function WelcomeScreen({ onDone }: { onDone: () => void }) {
       <button
         type="button"
         onClick={onDone}
-        className="mt-8 text-sm font-medium text-brand-gray-600 underline-offset-2 hover:underline"
+        className="mt-8 text-sm font-medium text-brand-gray-200 underline-offset-2 hover:underline hover:text-white"
       >
         Continuar
       </button>
