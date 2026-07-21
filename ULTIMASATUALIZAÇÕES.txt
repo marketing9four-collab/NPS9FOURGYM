@@ -1,20 +1,28 @@
 =================================================================
  NPS 9FOURGYM — STATUS DO PROJETO
- Ultima atualizacao: 20/07/2026
+ Ultima atualizacao: 21/07/2026
 =================================================================
 
 LINKS
 -----
-Encuesta publica (para divulgar):
-  https://nps-9-fourgym.vercel.app
+Encuestas publicas (uma por unidade — divulgar o link certo pra cada):
+  https://nps-9-fourgym.vercel.app/arboledas
+  https://nps-9-fourgym.vercel.app/metepec
+  https://nps-9-fourgym.vercel.app/interlomas
+  https://nps-9-fourgym.vercel.app/lomas
+
+  A raiz (https://nps-9-fourgym.vercel.app) mostra uma tela simples com os
+  4 botoes, caso alguem acesse sem link especifico.
 
 Painel admin (login):
   https://nps-9-fourgym.vercel.app/admin/nps-9fourgym/login
   Usuario: Cami
-  Senha:   cami9fourgym
+  Senha:   Fbkgf6CJcU232p
+  (senha foi trocada em 21/07 por causa de um vazamento, ver "BUGS" abaixo —
+  se trocar de novo, atualizar aqui tambem e NUNCA versionar em .txt solto)
 
 GitHub:
-  https://github.com/marketing9four-collab/NPS9FOURGYM
+  https://github.com/marketing9four-collab/NPS9FOURGYM  (repositorio PUBLICO)
 
 Vercel:
   Projeto: 9fourgym-3195s-projects/nps-9-fourgym
@@ -26,12 +34,15 @@ Supabase:
 STATUS GERAL: NO AR E FUNCIONANDO
 ----------------------------------
 - Supabase: migrations 0001, 0002, 0003 rodadas. RLS ativa (publico so insere,
-  nunca le/edita/apaga).
-- GitHub: repositorio criado e conectado, push funcionando.
+  nunca le/edita/apaga). Uma unica tabela survey_responses pra todas as
+  unidades (o campo "unit" identifica cada uma).
+- GitHub: repositorio criado e conectado, push funcionando. Repo e PUBLICO —
+  cuidado pra nunca commitar senhas/chaves em arquivos soltos.
 - Vercel: deploy de producao funcionando, todas as env vars configuradas.
-- Encuesta publica: testada e funcionando (envio, N/A, anonimo, comentarios).
+- Encuesta publica: testada e funcionando (envio, N/A, anonimo, comentarios,
+  4 links fixos por unidade).
 - Painel admin: testado e funcionando (login, metricas, tabela, filtros,
-  exportar CSV, apagar todos os dados).
+  exportar CSV, apagar todos os dados) — 100% em portugues.
 
 
 O QUE JA FOI FEITO (ordem cronologica resumida)
@@ -40,23 +51,35 @@ O QUE JA FOI FEITO (ordem cronologica resumida)
 2. Encuesta publica em espanhol mexicano (ES-MX):
    - Tela de boas-vindas (fundo preto, texto branco, logo, ~2.5s, depois some).
    - Banner "banner_1.png" no topo.
-   - Selecao de unidade (Arboledas, Metepec, Interlomas, Lomas).
-   - 8 perguntas de avaliacao (0-10 + N/A): recepcion, equipos, limpieza,
-     banos, clases_colectivas, entrenadores, gerencia, estacionamiento.
-   - Botao "Quiero comentar esto" em cada pergunta (comentario opcional).
+   - 10 perguntas: 8 de avaliacao 0-10 (recepcion, equipos, "Higiene, limpieza
+     y organizacion de nuestras instalaciones", banos, "Clases grupales y
+     spinning", entrenadores, gerencia, estacionamiento), 1 pergunta NPS
+     ("¿Que tan probable es que nos recomiendes...?"), e 1 pergunta de
+     multipla escolha ("¿Que red social utilizas mas?" — TikTok, Instagram,
+     Facebook, YouTube, Kwai, Twitter (X), Pinterest, No utilizo, Otra c/
+     campo de texto livre).
+   - Botao "Quiero comentar esto" em cada pergunta de nota (comentario opcional).
    - Etapa de contato opcional (nome/email) com envio anonimo.
    - Tela de confirmacao final.
-3. Painel admin (/admin/nps-9fourgym) 100% em PORTUGUES (PT-BR), conforme
+   - Layout mobile: botoes de nota quebram em varias linhas (sem precisar
+     arrastar), graficos e tabelas com scroll horizontal quando necessario.
+3. ENCUESTA DIVIDIDA POR UNIDADE (21/07): antes tinha um seletor de unidade
+   dentro da propria pagina; agora sao 4 rotas fixas (/arboledas, /metepec,
+   /interlomas, /lomas), cada uma ja envia a unidade certa automaticamente,
+   sem seletor. Continua tudo no MESMO banco e MESMO painel admin.
+4. Painel admin (/admin/nps-9fourgym) 100% em PORTUGUES (PT-BR), conforme
    pedido, mesmo com a encuesta publica em espanhol:
    - Login protegido (cookie assinada, senha com hash bcrypt).
    - Metricas gerais, graficos (media por pergunta, comparacao por unidade,
-     distribuicao de notas), tabela de respostas, filtros (unidade/data/busca),
-     paginacao, exportar CSV, botao "Apagar todos os dados" (com confirmacao).
-4. Banco de dados (Supabase):
+     distribuicao de notas, distribuicao da pergunta de rede social),
+     tabela de respostas, filtros (unidade/data/busca), paginacao,
+     exportar CSV, botao "Apagar todos os dados" (com confirmacao).
+5. Banco de dados (Supabase):
    - Tabela survey_responses com RLS (publico so insere).
-   - Campo answers (jsonb), comments (jsonb), overall_average calculado
-     ignorando N/A.
-5. Deploy: GitHub -> Vercel, com todas as env vars configuradas.
+   - Campo answers (jsonb, aceita numero 0-10 ou texto pra pergunta de
+     escolha), comments (jsonb), overall_average calculado ignorando N/A e
+     ignorando a pergunta de rede social (que nao e numerica).
+6. Deploy: GitHub -> Vercel, com todas as env vars configuradas.
 
 
 BUGS ENCONTRADOS E CORRIGIDOS
@@ -72,39 +95,49 @@ BUGS ENCONTRADOS E CORRIGIDOS
    lib/supabase/anon.ts, lib/supabase/server.ts).
 4. Login admin falhando com usuario/senha corretos -> mesmo motivo do BOM,
    corrigido com o .trim().
+5. VAZAMENTO DE SENHA (21/07): um arquivo local "Link de Divulgacao.txt" com
+   usuario/senha do admin em texto puro foi commitado sem querer e subiu pro
+   GitHub, que e um repositorio PUBLICO. Corrigido: arquivo removido do
+   controle de versao e adicionado ao .gitignore, e a senha do admin foi
+   trocada imediatamente (senha antiga "cami9fourgym" desativada, nova senha
+   e a que esta em LINKS acima). Licao: nunca guardar senha em arquivo solto
+   dentro da pasta do projeto sem estar no .gitignore.
 
 
-ULTIMA FEATURE IMPLEMENTADA
+ULTIMAS FEATURES IMPLEMENTADAS
 ------------------------------
-Auto-save das respostas: assim que o usuario termina de avaliar (clica em
-"Continuar" depois da ultima pergunta, Estacionamiento), a resposta ja e
-salva no banco como "Usuario Anonimo". Se ele fechar o navegador na tela de
-contato sem preencher nada, a resposta ja esta arquivada. Se ele preencher
-nome/email e enviar, o MESMO registro e atualizado (nao cria duplicata).
-Testado em producao e confirmado funcionando (arquivo
-app/api/survey/route.ts).
+1. Auto-save das respostas: assim que o usuario termina de avaliar (clica em
+   "Continuar" depois da ultima pergunta), a resposta ja e salva no banco
+   como "Usuario Anonimo". Se ele fechar o navegador na tela de contato sem
+   preencher nada, a resposta ja esta arquivada. Se ele preencher nome/email
+   e enviar, o MESMO registro e atualizado (nao cria duplicata).
+2. Pergunta de recomendacao (NPS) e pergunta de rede social mais usada
+   (multipla escolha com opcao "Otra") adicionadas.
+3. Encuesta dividida em 4 links fixos por unidade (ver LINKS acima).
 
 
 PENDENCIAS / PROXIMOS PASSOS
 -------------------------------
-[ ] Decidir se limpa os dados de teste que ja estao no banco (existem
-    algumas respostas de teste la, incluindo "Kevin / kevin@9fourgym.mx").
-    Usar o botao "Apagar todos os dados" no painel antes de divulgar o link
-    de verdade.
 [ ] Confirmar se quer o link opcional "Volver al sitio" na tela de
     confirmacao (variavel NEXT_PUBLIC_SITE_URL, hoje vazia/nao configurada).
 [ ] Considerar: salvar automaticamente como incompleto ja durante o
     preenchimento das perguntas (antes de terminar todas)? Hoje o auto-save
     so acontece DEPOIS de responder todas as perguntas e clicar Continuar.
-[ ] Revisar textos finais das 8 perguntas com o time da 9FOURGYM (foram
-    definidas com base no pedido do usuario: limpeza, banheiros, aulas
-    coletivas, professores/treinadores, gerencia da unidade, estacionamento).
+[ ] Se quiser, dá pra adicionar um card de "NPS Score" de verdade no painel
+    (promotores - detratores) agora que existe a pergunta dedicada — hoje ela
+    so entra na media geral como as demais.
+[ ] Considerar mostrar o nome da unidade na propria pagina da encuesta
+    (hoje o titulo e generico, so a URL indica a unidade).
 
 
 ARQUIVOS IMPORTANTES
 -----------------------
 lib/questions.ts              -> lista das perguntas da encuesta (editar aqui
-                                  para adicionar/remover perguntas)
+                                  para adicionar/remover perguntas; suporta
+                                  type: "rating", "nps" ou "choice")
+lib/constants.ts              -> UNIT_SLUGS (mapa unidade -> slug da URL)
+app/[unit]/page.tsx           -> rota fixa por unidade (/arboledas etc.)
+app/page.tsx                  -> tela raiz com os 4 links
 app/api/survey/route.ts       -> logica de salvar/atualizar resposta
 lib/auth/password.ts          -> validacao de login do admin
 supabase/migrations/          -> SQL das tabelas e seguranca (RLS)
@@ -122,4 +155,6 @@ COMO RETOMAR O TRABALHO
 3. Qualquer alteracao: editar o codigo, rodar "npx tsc --noEmit" para
    verificar erros, depois "git add -A", "git commit -m ...",
    "git push origin main", e "vercel --prod --yes" para publicar.
+4. CUIDADO: o repositorio do GitHub e PUBLICO. Nunca commitar senhas, chaves
+   ou o arquivo de links/credenciais sem estar no .gitignore.
 =================================================================
