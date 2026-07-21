@@ -14,7 +14,7 @@ export const questions: Question[] = [
   { id: "equipos", label: "Equipos y accesorios", type: "rating" },
   { id: "limpieza", label: "Higiene, limpieza y organización de nuestras instalaciones", type: "rating" },
   { id: "banos", label: "Limpieza y mantenimiento de los baños", type: "rating" },
-  { id: "clases_colectivas", label: "Clases colectivas", type: "rating" },
+  { id: "clases_colectivas", label: "Clases grupales y spinning", type: "rating" },
   { id: "entrenadores", label: "Profesores y entrenadores", type: "rating" },
   { id: "gerencia", label: "Gerencia de la unidad", type: "rating" },
   { id: "estacionamiento", label: "Estacionamiento", type: "rating" },
