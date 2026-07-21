@@ -1,4 +1,4 @@
-import { questions } from "@/lib/questions";
+import { questions, type QuestionType } from "@/lib/questions";
 import { UNITS, ANONYMOUS_NAME, type Unit } from "@/lib/constants";
 import { calculateQuestionAverage } from "@/lib/nps";
 import type { SurveyResponseRow } from "@/lib/supabase/types";
@@ -6,11 +6,14 @@ import type { SurveyResponseRow } from "@/lib/supabase/types";
 export interface QuestionStat {
   id: string;
   label: string;
+  type: QuestionType;
   average: number | null;
   naCount: number;
   naPercent: number;
   distribution: Record<number, number>; // score (0-10) -> count
   byUnit: Record<Unit, number | null>;
+  /** Solo para type: "choice" — conteo de respuestas por opción elegida. */
+  choiceCounts?: Record<string, number>;
 }
 
 export interface DashboardStats {
@@ -63,7 +66,28 @@ export function computeDashboardStats(rows: SurveyResponseRow[]): DashboardStats
       })
     ) as Record<Unit, number | null>;
 
-    return { id: q.id, label: q.label, average, naCount, naPercent, distribution, byUnit };
+    let choiceCounts: Record<string, number> | undefined;
+    if (q.type === "choice") {
+      choiceCounts = {};
+      for (const row of rows) {
+        const value = row.answers[q.id];
+        if (typeof value === "string" && value.trim().length > 0) {
+          choiceCounts[value] = (choiceCounts[value] ?? 0) + 1;
+        }
+      }
+    }
+
+    return {
+      id: q.id,
+      label: q.label,
+      type: q.type,
+      average,
+      naCount,
+      naPercent,
+      distribution,
+      byUnit,
+      choiceCounts,
+    };
   });
 
   return {

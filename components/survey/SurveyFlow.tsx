@@ -16,7 +16,7 @@ type Stage = "welcome" | "questions" | "contact" | "confirmation";
 interface State {
   stage: Stage;
   unit: Unit | null;
-  answers: Record<string, number | null | undefined>;
+  answers: Record<string, number | string | null | undefined>;
   comments: Record<string, string>;
   errors: {
     unit?: string;
@@ -33,7 +33,7 @@ interface State {
 type Action =
   | { type: "SKIP_WELCOME" }
   | { type: "SET_UNIT"; unit: Unit }
-  | { type: "SET_ANSWER"; questionId: string; value: number | null }
+  | { type: "SET_ANSWER"; questionId: string; value: number | string | null }
   | { type: "SET_COMMENT"; questionId: string; value: string }
   | { type: "VALIDATE_STAGE1_FAIL"; errors: State["errors"] }
   | { type: "GO_TO_CONTACT" }
@@ -123,7 +123,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 interface SurveyPayload {
   submissionId: string;
   unit: Unit | null;
-  answers: Record<string, number | null | undefined>;
+  answers: Record<string, number | string | null | undefined>;
   comments: Record<string, string>;
   name: string;
   email: string;
@@ -167,7 +167,10 @@ export function SurveyFlow() {
     }
 
     for (const q of questions) {
-      const answered = q.id in state.answers && state.answers[q.id] !== undefined;
+      const answered =
+        q.id in state.answers &&
+        state.answers[q.id] !== undefined &&
+        state.answers[q.id] !== "";
       if (!answered) {
         errors.questions![q.id] = "Falta calificar esta pregunta.";
         if (!firstInvalid) firstInvalid = q.id;

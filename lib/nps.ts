@@ -1,6 +1,6 @@
 /** Promedio general de las respuestas numéricas de una encuesta, ignorando N/A (null). */
 export function calculateOverallAverage(
-  answers: Record<string, number | null>
+  answers: Record<string, number | string | null>
 ): number | null {
   const numeric = Object.values(answers).filter(
     (v): v is number => typeof v === "number"
@@ -12,7 +12,7 @@ export function calculateOverallAverage(
 
 /** Promedio de una pregunta específica a través de varias respuestas, ignorando N/A. */
 export function calculateQuestionAverage(
-  responses: { answers: Record<string, number | null> }[],
+  responses: { answers: Record<string, number | string | null> }[],
   questionId: string
 ): { average: number | null; naCount: number; naPercent: number } {
   const values = responses.map((r) => r.answers[questionId]);

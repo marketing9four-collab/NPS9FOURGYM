@@ -6,7 +6,7 @@ export interface SurveyResponseRow {
   unit: Unit;
   respondent_name: string;
   respondent_email: string | null;
-  answers: Record<string, number | null>;
+  answers: Record<string, number | string | null>;
   comments: Record<string, string> | null;
   overall_average: number | null;
   completed: boolean;
@@ -19,7 +19,7 @@ export interface SurveyResponseInsert {
   unit: Unit;
   respondent_name: string;
   respondent_email: string | null;
-  answers: Record<string, number | null>;
+  answers: Record<string, number | string | null>;
   comments: Record<string, string> | null;
   overall_average: number | null;
   completed: boolean;

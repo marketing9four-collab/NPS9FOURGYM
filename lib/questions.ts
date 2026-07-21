@@ -1,9 +1,13 @@
-export type QuestionType = "rating" | "nps";
+export type QuestionType = "rating" | "nps" | "choice";
 
 export interface Question {
   id: string;
   label: string;
   type: QuestionType;
+  /** Solo para type: "choice" — opciones fijas que se muestran como botones. */
+  options?: string[];
+  /** Solo para type: "choice" — agrega un botón "Otra" con campo de texto libre. */
+  allowOther?: boolean;
 }
 
 // Estructura fácil de mantener: agrega/edita preguntas aquí, no en los componentes.
@@ -22,6 +26,22 @@ export const questions: Question[] = [
     id: "recomendacion",
     label: "¿Qué tan probable es que nos recomiendes a un amigo o compañero?",
     type: "nps",
+  },
+  {
+    id: "red_social",
+    label: "¿Qué red social utilizas más?",
+    type: "choice",
+    options: [
+      "TikTok",
+      "Instagram",
+      "Facebook",
+      "YouTube",
+      "Kwai",
+      "Twitter (X)",
+      "Pinterest",
+      "No utilizo",
+    ],
+    allowOther: true,
   },
 ];
 

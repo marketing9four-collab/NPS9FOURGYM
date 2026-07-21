@@ -12,6 +12,7 @@ import { FilterBar } from "./FilterBar";
 import { AverageByQuestionChart } from "./charts/AverageByQuestionChart";
 import { UnitComparisonChart } from "./charts/UnitComparisonChart";
 import { DistributionChart } from "./charts/DistributionChart";
+import { ChoiceBreakdownChart } from "./charts/ChoiceBreakdownChart";
 import { QuestionMetricsTable } from "./QuestionMetricsTable";
 import { ResponsesTable } from "./ResponsesTable";
 import { ResponseDetailDialog } from "./ResponseDetailDialog";
@@ -53,7 +54,9 @@ export function Dashboard() {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [selectedQuestionId, setSelectedQuestionId] = useState(questions[0]?.id ?? "");
+  const ratingQuestions = questions.filter((q) => q.type !== "choice");
+  const choiceQuestions = questions.filter((q) => q.type === "choice");
+  const [selectedQuestionId, setSelectedQuestionId] = useState(ratingQuestions[0]?.id ?? "");
   const [detailId, setDetailId] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -207,13 +210,39 @@ export function Dashboard() {
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border border-brand-gray-200 bg-white p-5">
           <h2 className="text-base font-semibold text-brand-black">Média por pergunta</h2>
-          {stats && <AverageByQuestionChart data={stats.questionStats} />}
+          {stats && (
+            <AverageByQuestionChart
+              data={stats.questionStats.filter((q) => q.type !== "choice")}
+            />
+          )}
         </div>
         <div className="rounded-2xl border border-brand-gray-200 bg-white p-5">
           <h2 className="text-base font-semibold text-brand-black">Comparação por unidade</h2>
-          {stats && <UnitComparisonChart data={stats.questionStats} />}
+          {stats && (
+            <UnitComparisonChart
+              data={stats.questionStats.filter((q) => q.type !== "choice")}
+            />
+          )}
         </div>
       </section>
+
+      {choiceQuestions.length > 0 && (
+        <section className="mt-8 grid gap-6 lg:grid-cols-2">
+          {choiceQuestions.map((qDef) => {
+            const qStat = stats?.questionStats.find((qs) => qs.id === qDef.id);
+            return (
+              <div key={qDef.id} className="rounded-2xl border border-brand-gray-200 bg-white p-5">
+                <h2 className="text-base font-semibold text-brand-black">{qDef.label}</h2>
+                {qStat?.choiceCounts && Object.keys(qStat.choiceCounts).length > 0 ? (
+                  <ChoiceBreakdownChart counts={qStat.choiceCounts} />
+                ) : (
+                  <p className="mt-3 text-sm text-brand-gray-600">Ainda não há respostas.</p>
+                )}
+              </div>
+            );
+          })}
+        </section>
+      )}
 
       <section className="mt-8 rounded-2xl border border-brand-gray-200 bg-white p-5">
         <h2 className="text-base font-semibold text-brand-black">Distribuição de notas</h2>
@@ -222,7 +251,7 @@ export function Dashboard() {
           role="group"
           aria-label="Selecione uma pergunta"
         >
-          {questions.map((qDef) => (
+          {ratingQuestions.map((qDef) => (
             <button
               key={qDef.id}
               type="button"
@@ -245,7 +274,13 @@ export function Dashboard() {
       <section className="mt-8">
         <h2 className="text-base font-semibold text-brand-black">Métricas por pergunta</h2>
         <p className="mt-1 text-xs text-brand-gray-600 sm:hidden">Deslize para o lado para ver mais →</p>
-        <div className="mt-3">{stats && <QuestionMetricsTable data={stats.questionStats} />}</div>
+        <div className="mt-3">
+          {stats && (
+            <QuestionMetricsTable
+              data={stats.questionStats.filter((q) => q.type !== "choice")}
+            />
+          )}
+        </div>
       </section>
 
       <section className="mt-8">
