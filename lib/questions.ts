@@ -18,6 +18,11 @@ export const questions: Question[] = [
   { id: "entrenadores", label: "Profesores y entrenadores", type: "rating" },
   { id: "gerencia", label: "Gerencia de la unidad", type: "rating" },
   { id: "estacionamiento", label: "Estacionamiento", type: "rating" },
+  {
+    id: "recomendacion",
+    label: "¿Qué tan probable es que nos recomiendes a un amigo o compañero?",
+    type: "nps",
+  },
 ];
 
 export const hasNpsQuestions = questions.some((q) => q.type === "nps");
