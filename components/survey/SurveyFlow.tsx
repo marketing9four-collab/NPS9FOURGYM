@@ -44,16 +44,16 @@ type Action =
   | { type: "SUBMIT_SUCCESS" }
   | { type: "SUBMIT_ERROR"; message: string }
   | { type: "SUBMIT_EMAIL_INVALID"; message: string }
-  | { type: "RESET" };
+  | { type: "RESET"; fixedUnit: Unit | null };
 
 function makeSubmissionId() {
   return crypto.randomUUID();
 }
 
-function initialState(): State {
+function initialState(fixedUnit: Unit | null): State {
   return {
     stage: "welcome",
-    unit: null,
+    unit: fixedUnit,
     answers: {},
     comments: {},
     errors: {},
@@ -112,7 +112,7 @@ function reducer(state: State, action: Action): State {
         errors: { ...state.errors, email: action.message },
       };
     case "RESET":
-      return initialState();
+      return initialState(action.fixedUnit);
     default:
       return state;
   }
@@ -138,8 +138,12 @@ async function postSurvey(payload: SurveyPayload) {
   });
 }
 
-export function SurveyFlow() {
-  const [state, dispatch] = useReducer(reducer, undefined, initialState);
+interface SurveyFlowProps {
+  fixedUnit?: Unit | null;
+}
+
+export function SurveyFlow({ fixedUnit = null }: SurveyFlowProps) {
+  const [state, dispatch] = useReducer(reducer, fixedUnit, initialState);
   const unitRef = useRef<HTMLDivElement | null>(null);
   const questionRefs = useRef(new Map<string, HTMLDivElement>());
   const submittingRef = useRef(false);
@@ -161,7 +165,7 @@ export function SurveyFlow() {
     const errors: State["errors"] = { questions: {} };
     let firstInvalid: string | null = null;
 
-    if (!state.unit) {
+    if (!state.unit && !fixedUnit) {
       errors.unit = "Selecciona una sede para continuar.";
       firstInvalid = "unit";
     }
@@ -248,7 +252,9 @@ export function SurveyFlow() {
   }
 
   if (state.stage === "confirmation") {
-    return <ConfirmationScreen onFinish={() => dispatch({ type: "RESET" })} />;
+    return (
+      <ConfirmationScreen onFinish={() => dispatch({ type: "RESET", fixedUnit })} />
+    );
   }
 
   return (
@@ -257,14 +263,16 @@ export function SurveyFlow() {
 
       {state.stage === "questions" && (
         <div className="pb-16">
-          <UnitSelector
-            value={state.unit}
-            onChange={(unit) => dispatch({ type: "SET_UNIT", unit })}
-            error={state.errors.unit}
-            innerRef={(el) => (unitRef.current = el)}
-          />
+          {!fixedUnit && (
+            <UnitSelector
+              value={state.unit}
+              onChange={(unit) => dispatch({ type: "SET_UNIT", unit })}
+              error={state.errors.unit}
+              innerRef={(el) => (unitRef.current = el)}
+            />
+          )}
 
-          <div className="mt-10">
+          <div className={fixedUnit ? "mt-6" : "mt-10"}>
             <QuestionList
               answers={state.answers}
               onChange={(questionId, value) =>

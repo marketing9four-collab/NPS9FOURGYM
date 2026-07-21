@@ -10,6 +10,21 @@ export const UNIT_LABELS: Record<Unit, string> = {
 
 export const ANONYMOUS_NAME = "Usuario Anónimo";
 
+/** Slugs de URL por unidad — usados en las rutas /[unit] (una liga fija por sede). */
+export const UNIT_SLUGS: Record<Unit, string> = {
+  ARBOLEDAS: "arboledas",
+  METEPEC: "metepec",
+  INTERLOMAS: "interlomas",
+  LOMAS: "lomas",
+};
+
+export function getUnitBySlug(slug: string): Unit | null {
+  const entry = (Object.entries(UNIT_SLUGS) as [Unit, string][]).find(
+    ([, s]) => s === slug.toLowerCase()
+  );
+  return entry ? entry[0] : null;
+}
+
 /**
  * Clases de color por nota, siguiendo el mapeo del brief:
  * 0-3 rojizo, 4-6 amarillo/naranja, 7-8 verde claro, 9-10 verde, N/A gris.
