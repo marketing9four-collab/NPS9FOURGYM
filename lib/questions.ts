@@ -12,7 +12,7 @@ export interface Question {
 export const questions: Question[] = [
   { id: "recepcion", label: "Atención en recepción", type: "rating" },
   { id: "equipos", label: "Equipos y accesorios", type: "rating" },
-  { id: "limpieza", label: "Limpieza de las instalaciones", type: "rating" },
+  { id: "limpieza", label: "Higiene, limpieza y organización de nuestras instalaciones", type: "rating" },
   { id: "banos", label: "Limpieza y mantenimiento de los baños", type: "rating" },
   { id: "clases_colectivas", label: "Clases colectivas", type: "rating" },
   { id: "entrenadores", label: "Profesores y entrenadores", type: "rating" },
