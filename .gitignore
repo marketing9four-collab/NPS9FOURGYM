@@ -22,3 +22,7 @@ tsconfig.tsbuildinfo
 
 .vercel
 .env*
+
+## Arquivos locais com credenciais/links — nunca versionar
+"Link de Divulgação.txt"
+Link de Divulgação.txt
