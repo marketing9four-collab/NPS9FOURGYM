@@ -1,6 +1,6 @@
 =================================================================
  NPS 9FOURGYM — STATUS DO PROJETO
- Ultima atualizacao: 21/07/2026
+ Ultima atualizacao: 22/07/2026
 =================================================================
 
 LINKS
@@ -51,13 +51,14 @@ O QUE JA FOI FEITO (ordem cronologica resumida)
 2. Encuesta publica em espanhol mexicano (ES-MX):
    - Tela de boas-vindas (fundo preto, texto branco, logo, ~2.5s, depois some).
    - Banner "banner_1.png" no topo.
-   - 10 perguntas: 8 de avaliacao 0-10 (recepcion, equipos, "Higiene, limpieza
+   - 11 perguntas: 8 de avaliacao 0-10 (recepcion, equipos, "Higiene, limpieza
      y organizacion de nuestras instalaciones", banos, "Clases grupales y
      spinning", entrenadores, gerencia, estacionamiento), 1 pergunta NPS
-     ("¿Que tan probable es que nos recomiendes...?"), e 1 pergunta de
+     ("¿Que tan probable es que nos recomiendes...?"), 1 pergunta de
      multipla escolha ("¿Que red social utilizas mas?" — TikTok, Instagram,
      Facebook, YouTube, Kwai, Twitter (X), Pinterest, No utilizo, Otra c/
-     campo de texto livre).
+     campo de texto livre), e 1 pergunta de horario ("¿A que hora sueles ir
+     al gimnasio?" — campo tipo relogio, HH:MM, sem nota 0-10).
    - Botao "Quiero comentar esto" em cada pergunta de nota (comentario opcional).
    - Etapa de contato opcional (nome/email) com envio anonimo.
    - Tela de confirmacao final.
@@ -71,7 +72,8 @@ O QUE JA FOI FEITO (ordem cronologica resumida)
    pedido, mesmo com a encuesta publica em espanhol:
    - Login protegido (cookie assinada, senha com hash bcrypt).
    - Metricas gerais, graficos (media por pergunta, comparacao por unidade,
-     distribuicao de notas, distribuicao da pergunta de rede social),
+     distribuicao de notas, distribuicao da pergunta de rede social,
+     distribuicao de horario habitual de visita — agrupado por hora),
      tabela de respostas, filtros (unidade/data/busca), paginacao,
      exportar CSV, botao "Apagar todos os dados" (com confirmacao).
 5. Banco de dados (Supabase):
@@ -114,6 +116,11 @@ ULTIMAS FEATURES IMPLEMENTADAS
 2. Pergunta de recomendacao (NPS) e pergunta de rede social mais usada
    (multipla escolha com opcao "Otra") adicionadas.
 3. Encuesta dividida em 4 links fixos por unidade (ver LINKS acima).
+4. Pergunta de horario habitual de visita adicionada (22/07): campo tipo
+   relogio (nao e nota 0-10). Novo type: "time" em lib/questions.ts, novo
+   componente TimeQuestion.tsx na encuesta, e novo grafico
+   TimeBreakdownChart.tsx no painel (agrupa respostas por hora cheia,
+   ex: "18:00", pra ficar legivel mesmo com muitos horarios diferentes).
 
 
 PENDENCIAS / PROXIMOS PASSOS
@@ -134,7 +141,7 @@ ARQUIVOS IMPORTANTES
 -----------------------
 lib/questions.ts              -> lista das perguntas da encuesta (editar aqui
                                   para adicionar/remover perguntas; suporta
-                                  type: "rating", "nps" ou "choice")
+                                  type: "rating", "nps", "choice" ou "time")
 lib/constants.ts              -> UNIT_SLUGS (mapa unidade -> slug da URL)
 app/[unit]/page.tsx           -> rota fixa por unidade (/arboledas etc.)
 app/page.tsx                  -> tela raiz com os 4 links
