@@ -8,6 +8,8 @@ const answerValueSchema = z.union([
   z.null(),
 ]);
 
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
 const answersSchema = z
   .record(z.string(), answerValueSchema)
   .superRefine((answers, ctx) => {
@@ -24,6 +26,13 @@ const answersSchema = z
 
       if (q.type === "choice") {
         if (typeof value !== "string" || value.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Falta responder: ${q.label}`,
+          });
+        }
+      } else if (q.type === "time") {
+        if (typeof value !== "string" || !TIME_RE.test(value)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Falta responder: ${q.label}`,

@@ -14,6 +14,13 @@ export interface QuestionStat {
   byUnit: Record<Unit, number | null>;
   /** Solo para type: "choice" — conteo de respuestas por opción elegida. */
   choiceCounts?: Record<string, number>;
+  /** Solo para type: "time" — conteo de respuestas agrupadas por hora ("06:00", "07:00", ...). */
+  timeCounts?: Record<string, number>;
+}
+
+function bucketHour(time: string): string {
+  const hour = time.split(":")[0]?.padStart(2, "0") ?? "00";
+  return `${hour}:00`;
 }
 
 export interface DashboardStats {
@@ -77,6 +84,18 @@ export function computeDashboardStats(rows: SurveyResponseRow[]): DashboardStats
       }
     }
 
+    let timeCounts: Record<string, number> | undefined;
+    if (q.type === "time") {
+      timeCounts = {};
+      for (const row of rows) {
+        const value = row.answers[q.id];
+        if (typeof value === "string" && value.trim().length > 0) {
+          const bucket = bucketHour(value);
+          timeCounts[bucket] = (timeCounts[bucket] ?? 0) + 1;
+        }
+      }
+    }
+
     return {
       id: q.id,
       label: q.label,
@@ -87,6 +106,7 @@ export function computeDashboardStats(rows: SurveyResponseRow[]): DashboardStats
       distribution,
       byUnit,
       choiceCounts,
+      timeCounts,
     };
   });
 

@@ -1,6 +1,7 @@
 import { questions } from "@/lib/questions";
 import { RatingQuestion } from "./RatingQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
+import { TimeQuestion } from "./TimeQuestion";
 
 interface QuestionListProps {
   answers: Record<string, number | string | null | undefined>;
@@ -24,6 +25,15 @@ export function QuestionList({
       {questions.map((question) =>
         question.type === "choice" ? (
           <ChoiceQuestion
+            key={question.id}
+            question={question}
+            value={answers[question.id] as string | null | undefined}
+            onChange={(value) => onChange(question.id, value)}
+            error={errors?.[question.id]}
+            innerRef={(el) => registerRef?.(question.id, el)}
+          />
+        ) : question.type === "time" ? (
+          <TimeQuestion
             key={question.id}
             question={question}
             value={answers[question.id] as string | null | undefined}

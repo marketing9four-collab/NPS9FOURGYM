@@ -1,4 +1,4 @@
-export type QuestionType = "rating" | "nps" | "choice";
+export type QuestionType = "rating" | "nps" | "choice" | "time";
 
 export interface Question {
   id: string;
@@ -42,6 +42,11 @@ export const questions: Question[] = [
       "No utilizo",
     ],
     allowOther: true,
+  },
+  {
+    id: "horario_visita",
+    label: "¿A qué hora sueles ir al gimnasio?",
+    type: "time",
   },
 ];
 
